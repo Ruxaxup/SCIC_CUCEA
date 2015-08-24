@@ -5,7 +5,7 @@
 //#include <TimerOne.h>
 
 //SERIAL USE FOR TESTING
-#define DEBUG 1
+#define DEBUG 0
 //El valor hexadecimal es el tiempo de parpadeo
 #define LUZ 		0x01	//0000	0001
 #define PRESION 	0x02	//0000	0010
@@ -36,10 +36,11 @@ int ledError = 8;
 #define G_1FYD  6
 #define G_1FCW  7
 #define G_1H4N  8
+#define G_1FWX  9
 /***** Ethernet ******/
-#define GALILEO G_1ELA
+#define GALILEO G_1FYD
 //#define thingName "Test-Galileo-1"
-#define thingName "SC_Galileo_2"
+#define thingName "SC_Galileo_6"
 #define MAC_SIZE 6
 //MAC esta escrita en la etiqueta del puerto Ethernet
 byte mac1GTW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE5, 0x86 };    //0
@@ -51,15 +52,16 @@ byte mac1F4K[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE4, 0x5E };    //5
 byte mac1FYD[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE1, 0xDD };    //6
 byte mac1FCW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE3, 0xBA };    //7
 byte mac1H4N[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE4, 0xC4 };    //8
+byte mac1FWX[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE6, 0x42 };    //9
 
 byte mac3M0B[] = { 0x98, 0x4F, 0xEE, 0x02, 0xD7, 0xFF }; // GALILLEO 2
 
 byte actualMac[6];
 EthernetClient client;
-//char server[] = "www.dweet.io"; 
+char server[] = "www.dweet.io"; 
 
-char server[] = "148.202.23.200";
-char sensor_id[] = "G_1ELA";
+//char server[] = "148.202.23.200";
+char sensor_id[] = "G_1FYD";
 float longitude;
 float latitude;
 float location;
@@ -105,6 +107,9 @@ boolean initializeEthernet(){
     case 7:
       copyArray(actualMac,mac1FCW,MAC_SIZE);
     break;
+    case 9:
+      copyArray(actualMac,mac1FWX,MAC_SIZE);
+    break;
   }
   //habilitamos el puerto ethernet de galileo
   if(DEBUG == 1) Serial.print("Setting up ethernet port");
@@ -134,9 +139,11 @@ void sendDweet(float presion, float temperatura, double ruido,
       errorFlag = errorFlag ^ SERVER;
     }
     //Estructura de los datos
-    client.print("GET /CICI/IoT/test_mongophp.php");
-    //client.print("?sensor_id=");
-    //client.print(sensor_id);
+    //client.print("GET /CICI/IoT/test_mongophp.php");
+    client.print("GET /dweet/for/");
+    client.print(thingName);
+    client.print("?sensor_id=");
+    client.print(sensor_id);
     //Data to send
     client.print("&pressure=");
     client.print(presion);
@@ -161,11 +168,11 @@ void sendDweet(float presion, float temperatura, double ruido,
     client.print("&latitude=");    
     client.print(latitude);*/
     client.println(" HTTP/1.0");
-    client.println();
+    
     //Indicador de host y cierre de la conexion
-    //client.println("Host: dweet.io");
-    //client.println("Connection: close");
-
+    client.println("Host: dweet.io");
+    client.println("Connection: close");
+    client.println();
     client.flush();  
       
     //Leemos la respuesta
