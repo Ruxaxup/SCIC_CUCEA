@@ -38,9 +38,9 @@ int ledError = 8;
 #define G_1H4N  8
 #define G_1FWX  9
 /***** Ethernet ******/
-#define GALILEO G_1FYD
+#define GALILEO G_1ELA
 //#define thingName "Test-Galileo-1"
-#define thingName "SC_Galileo_6"
+#define thingName "SC_Galileo_4"
 #define MAC_SIZE 6
 //MAC esta escrita en la etiqueta del puerto Ethernet
 byte mac1GTW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE5, 0x86 };    //0
@@ -61,7 +61,7 @@ EthernetClient client;
 char server[] = "www.dweet.io"; 
 
 //char server[] = "148.202.23.200";
-char sensor_id[] = "G_1FYD";
+char sensor_id[] = "G_1ELA";
 float longitude;
 float latitude;
 float location;
@@ -259,6 +259,7 @@ void printToSerialNoise(double noise){
   Serial.println("");
 }
 
+//PARPADEA EL LED DE ERROR SEGUN SEA LA BANDERA
 void blinkError(byte flag){
   int i;
   for(i = 0; i < flag; i++){
@@ -266,6 +267,11 @@ void blinkError(byte flag){
     delay(200);
     digitalWrite(ledError, LOW);
     delay(200);
+  }
+  if(DEBUG == 1){
+    Serial.print("Blinked ");
+    Serial.print(i);
+    Serial.println(" times");
   }
 }
 
@@ -307,9 +313,7 @@ void timerIsr(){
   digitalWrite(ledError, LOW);  
   
   if( (errorFlag&ETHERNET) == ETHERNET){
-    blinkError(ETHERNET);
-    //REINICIAR EL SISTEMA
-    system("reboot");
+    blinkError(ETHERNET);    
   }
   
   digitalWrite(ledError, HIGH);
@@ -318,9 +322,27 @@ void timerIsr(){
   
   if( (errorFlag&SERVER) == SERVER){
     blinkError(SERVER);
+    //REINICIAR EL SISTEMA
+    if(DEBUG ==1){
+      Serial.println("Rebooting system...");
+    }
+    rebootLEDs();
+    system("reboot");
   }
 }
 
+//REBOOT INDICATOR
+void rebootLEDs(){
+  digitalWrite(ledMic, HIGH);
+  digitalWrite(ledLuz, HIGH);
+  digitalWrite(ledBar, HIGH);
+  digitalWrite(ledError, HIGH);
+  delay(2000);
+  digitalWrite(ledMic, LOW);
+  digitalWrite(ledLuz, LOW);
+  digitalWrite(ledBar, LOW);
+  digitalWrite(ledError, LOW);
+}
 //METODO DE CONFIGURACIONES INICIALES
 void setup() {  
   if(DEBUG == 1) Serial.begin(9600);  
