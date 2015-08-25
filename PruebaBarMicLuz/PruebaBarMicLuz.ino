@@ -5,7 +5,7 @@
 //#include <TimerOne.h>
 
 //SERIAL USE FOR TESTING
-#define DEBUG 0
+#define DEBUG 1
 //El valor hexadecimal es el tiempo de parpadeo
 #define LUZ 		0x01	//0000	0001
 #define PRESION 	0x02	//0000	0010
@@ -38,9 +38,9 @@ int ledError = 8;
 #define G_1H4N  8
 #define G_1FWX  9
 /***** Ethernet ******/
-#define GALILEO G_1ELA
+#define GALILEO G_1FWX
 //#define thingName "Test-Galileo-1"
-#define thingName "SC_Galileo_4"
+#define thingName "SC_Galileo_9"
 #define MAC_SIZE 6
 //MAC esta escrita en la etiqueta del puerto Ethernet
 byte mac1GTW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE5, 0x86 };    //0
@@ -58,10 +58,10 @@ byte mac3M0B[] = { 0x98, 0x4F, 0xEE, 0x02, 0xD7, 0xFF }; // GALILLEO 2
 
 byte actualMac[6];
 EthernetClient client;
-char server[] = "www.dweet.io"; 
+//char server[] = "www.dweet.io"; 
 
-//char server[] = "148.202.23.200";
-char sensor_id[] = "G_1ELA";
+char server[] = "148.202.23.200";
+char sensor_id[] = "G_1FWX";
 float longitude;
 float latitude;
 float location;
@@ -133,25 +133,25 @@ void sendDweet(float presion, float temperatura, double ruido,
                uint32_t lumens)
 {
   //ruido = 20 * log10(ruido / 5);
-  if(DEBUG == 1) Serial.println("Dweeting...");
+  if(DEBUG == 1) Serial.println("Sending...");
   if(client.connect(server,80)){
     if(hasError(SERVER)){
       errorFlag = errorFlag ^ SERVER;
     }
     //Estructura de los datos
-    //client.print("GET /CICI/IoT/test_mongophp.php");
-    client.print("GET /dweet/for/");
-    client.print(thingName);
+    client.print("GET /CICI/IoT/test_mongophp.php");
+    //client.print("GET /dweet/for/");
+    //client.print(thingName);
     client.print("?sensor_id=");
     client.print(sensor_id);
     //Data to send
     client.print("&pressure=");
     client.print(presion);
-    client.print("&temp=");
+    client.print("&temperature=");
     client.print(temperatura);
     client.print("&noise=");
     client.print(ruido);
-    client.print("&lumens=");
+    client.print("&light=");
     client.print(lumens);
     //Board information
     /*client.print("&name=");
@@ -170,8 +170,8 @@ void sendDweet(float presion, float temperatura, double ruido,
     client.println(" HTTP/1.0");
     
     //Indicador de host y cierre de la conexion
-    client.println("Host: dweet.io");
-    client.println("Connection: close");
+    //client.println("Host: dweet.io");
+    //client.println("Connection: close");
     client.println();
     client.flush();  
       
