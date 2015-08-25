@@ -38,9 +38,9 @@ int ledError = 8;
 #define G_1H4N  8
 #define G_1FWX  9
 /***** Ethernet ******/
-#define GALILEO G_1ELA
+#define GALILEO G_1DN7
 //#define thingName "Test-Galileo-1"
-#define thingName "SC_Galileo_4"
+#define thingName "SC_Galileo_2"
 #define MAC_SIZE 6
 //MAC esta escrita en la etiqueta del puerto Ethernet
 byte mac1GTW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE5, 0x86 };    //0
@@ -61,7 +61,7 @@ EthernetClient client;
 char server[] = "www.dweet.io"; 
 
 //char server[] = "148.202.23.200";
-char sensor_id[] = "G_1ELA";
+char sensor_id[] = "G_1DN7";
 float longitude;
 float latitude;
 float location;
