@@ -167,6 +167,13 @@ void sendDweet(float presion, float temperatura, double ruido,
     client.print(longitude);
     client.print("&latitude=");    
     client.print(latitude);*/
+    //ENVIAR IP
+    client.print("&ip=");
+    client.print(Ethernet.localIP());
+    if(DEBUG == 1){
+      Serial.print(Ethernet.localIP());
+    }
+    
     client.println(" HTTP/1.0");
     
     //Indicador de host y cierre de la conexion
