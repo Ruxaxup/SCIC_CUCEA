@@ -5,7 +5,7 @@
 //#include <TimerOne.h>
 
 //SERIAL USE FOR TESTING
-#define DEBUG 1
+#define DEBUG 0
 //El valor hexadecimal es el tiempo de parpadeo
 #define LUZ 		0x01	//0000	0001
 #define PRESION 	0x02	//0000	0010
@@ -14,7 +14,7 @@
 #define ETHERNET 	0x10	//0001  0000
 #define SERVER	 	0x20	//0010  0000
 
-#define MUESTREO        1000
+#define MUESTREO        1000 * 30 // 30 segundos antes y despues de chequeo de errores
 byte errorFlag = 0x0;
 
 Adafruit_MPL115A2 barometro; //Barometro
@@ -154,13 +154,13 @@ void sendDweet(float presion, float temperatura, double ruido,
     client.print("&light=");
     client.print(lumens);
     //Board information
-    /*client.print("&name=");
+    client.print("&name=");
     client.print(_name);
     client.print("&email=");
     client.print(email);
-    client.print("&country=");*/
     //Location
-    /*client.print(country);
+    /*client.print("&country=");
+    client.print(country);
     client.print("&location=");
     client.print(location);
     client.print("&longitude=");
@@ -171,7 +171,7 @@ void sendDweet(float presion, float temperatura, double ruido,
     client.print("&ip=");
     client.print(Ethernet.localIP());
     if(DEBUG == 1){
-      Serial.print(Ethernet.localIP());
+      Serial.println(Ethernet.localIP());
     }
     
     client.println(" HTTP/1.0");
