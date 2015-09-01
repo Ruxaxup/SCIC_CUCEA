@@ -14,7 +14,7 @@
 #define ETHERNET 	0x10	//0001  0000
 #define SERVER	 	0x20	//0010  0000
 
-#define MUESTREO        1000
+#define MUESTREO        1000 * 30 // 30 segundos antes y despues de chequeo de errores
 byte errorFlag = 0x0;
 
 Adafruit_MPL115A2 barometro; //Barometro
@@ -38,9 +38,15 @@ int ledError = 8;
 #define G_1H4N  8
 #define G_1FWX  9
 /***** Ethernet ******/
+<<<<<<< HEAD
 #define GALILEO G_1DN7
 //#define thingName "Test-Galileo-1"
 #define thingName "SC_Galileo_2"
+=======
+#define GALILEO G_1FWX
+//#define thingName "Test-Galileo-1"
+#define thingName "SC_Galileo_9"
+>>>>>>> scicST
 #define MAC_SIZE 6
 //MAC esta escrita en la etiqueta del puerto Ethernet
 byte mac1GTW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE5, 0x86 };    //0
@@ -58,10 +64,15 @@ byte mac3M0B[] = { 0x98, 0x4F, 0xEE, 0x02, 0xD7, 0xFF }; // GALILLEO 2
 
 byte actualMac[6];
 EthernetClient client;
-char server[] = "www.dweet.io"; 
+//char server[] = "www.dweet.io"; 
 
+<<<<<<< HEAD
 //char server[] = "148.202.23.200";
 char sensor_id[] = "G_1DN7";
+=======
+char server[] = "148.202.23.200";
+char sensor_id[] = "G_1FWX";
+>>>>>>> scicST
 float longitude;
 float latitude;
 float location;
@@ -133,45 +144,52 @@ void sendDweet(float presion, float temperatura, double ruido,
                uint32_t lumens)
 {
   //ruido = 20 * log10(ruido / 5);
-  if(DEBUG == 1) Serial.println("Dweeting...");
+  if(DEBUG == 1) Serial.println("Sending...");
   if(client.connect(server,80)){
     if(hasError(SERVER)){
       errorFlag = errorFlag ^ SERVER;
     }
     //Estructura de los datos
-    //client.print("GET /CICI/IoT/test_mongophp.php");
-    client.print("GET /dweet/for/");
-    client.print(thingName);
+    client.print("GET /CICI/IoT/test_mongophp.php");
+    //client.print("GET /dweet/for/");
+    //client.print(thingName);
     client.print("?sensor_id=");
     client.print(sensor_id);
     //Data to send
     client.print("&pressure=");
     client.print(presion);
-    client.print("&temp=");
+    client.print("&temperature=");
     client.print(temperatura);
     client.print("&noise=");
     client.print(ruido);
-    client.print("&lumens=");
+    client.print("&light=");
     client.print(lumens);
     //Board information
-    /*client.print("&name=");
+    client.print("&name=");
     client.print(_name);
     client.print("&email=");
     client.print(email);
-    client.print("&country=");*/
     //Location
-    /*client.print(country);
+    /*client.print("&country=");
+    client.print(country);
     client.print("&location=");
     client.print(location);
     client.print("&longitude=");
     client.print(longitude);
     client.print("&latitude=");    
     client.print(latitude);*/
+    //ENVIAR IP
+    client.print("&ip=");
+    client.print(Ethernet.localIP());
+    if(DEBUG == 1){
+      Serial.println(Ethernet.localIP());
+    }
+    
     client.println(" HTTP/1.0");
     
     //Indicador de host y cierre de la conexion
-    client.println("Host: dweet.io");
-    client.println("Connection: close");
+    //client.println("Host: dweet.io");
+    //client.println("Connection: close");
     client.println();
     client.flush();  
       
