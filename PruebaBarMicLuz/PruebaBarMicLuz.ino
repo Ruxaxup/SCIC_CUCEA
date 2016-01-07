@@ -6,17 +6,19 @@
 
 //SERIAL USE FOR TESTING
 #define DEBUG 0
-//El valor hexadecimal es el tiempo de parpadeo
+//El valor hexadecimal es el tiempo de parpadeo para errores
 #define LUZ 		0x01	//0000	0001
 #define PRESION 	0x02	//0000	0010
 #define TEMPERATURA     0x04	//0000	0100
 #define RUIDO 		0x08	//0000	1000
 #define ETHERNET 	0x10	//0001  0000
 #define SERVER	 	0x20	//0010  0000
-
-#define MUESTREO        1000 * 30 // 30 segundos antes y despues de chequeo de errores
 byte errorFlag = 0x0;
 
+//FRECUENCIA DE MUESTRE
+#define MUESTREO        1000 * 30 // 30 segundos antes y despues de chequeo de errores
+
+//SENSORES
 Adafruit_MPL115A2 barometro; //Barometro
 TSL2561 luminosidad(TSL2561_ADDR_FLOAT); //Luminosidad
 const int sampleWindow = 50; //50 ms = 20 Hz
@@ -25,6 +27,11 @@ int ledMic = 7;
 int ledLuz = 12;
 int ledBar = 13;
 int ledError = 8;
+
+//CALIBRACION
+#define CAL_TEMP 5
+#define CAL_NOISE 10
+
 
 /***** TARJETAS GALILEO ******/
 #define G_1GTW  0
@@ -37,16 +44,15 @@ int ledError = 8;
 #define G_1FCW  7
 #define G_1H4N  8
 #define G_1FWX  9
+#define G_1GVT  10
+#define G_1HQ6  11
+#define G_1FWA  12
+#define G_1F56  13
 /***** Ethernet ******/
-<<<<<<< HEAD
-#define GALILEO G_1DN7
-//#define thingName "Test-Galileo-1"
-#define thingName "SC_Galileo_2"
-=======
-#define GALILEO G_1FWX
-//#define thingName "Test-Galileo-1"
-#define thingName "SC_Galileo_9"
->>>>>>> scicST
+
+#define GALILEO G_1F56
+#define thingName "SC_Galileo_5"
+
 #define MAC_SIZE 6
 //MAC esta escrita en la etiqueta del puerto Ethernet
 byte mac1GTW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE5, 0x86 };    //0
@@ -59,20 +65,18 @@ byte mac1FYD[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE1, 0xDD };    //6
 byte mac1FCW[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE3, 0xBA };    //7
 byte mac1H4N[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE4, 0xC4 };    //8
 byte mac1FWX[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE6, 0x42 };    //9
+byte mac1GVT[] = { 0x98, 0x4F, 0xEE, 0x00, 0xEA, 0xC1 };    //10
+byte mac1HQ6[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE5, 0x9D };    //11
+byte mac1FWA[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE2, 0xD7 };    //12
+byte mac1F56[] = { 0x98, 0x4F, 0xEE, 0x00, 0xE4, 0x5A };    //13
 
 byte mac3M0B[] = { 0x98, 0x4F, 0xEE, 0x02, 0xD7, 0xFF }; // GALILLEO 2
 
 byte actualMac[6];
 EthernetClient client;
-//char server[] = "www.dweet.io"; 
 
-<<<<<<< HEAD
-//char server[] = "148.202.23.200";
-char sensor_id[] = "G_1DN7";
-=======
+char sensor_id[] = "G_1F56";
 char server[] = "148.202.23.200";
-char sensor_id[] = "G_1FWX";
->>>>>>> scicST
 float longitude;
 float latitude;
 float location;
@@ -121,6 +125,18 @@ boolean initializeEthernet(){
     case 9:
       copyArray(actualMac,mac1FWX,MAC_SIZE);
     break;
+    case 10:
+      copyArray(actualMac,mac1GVT,MAC_SIZE);
+    break;
+    case 11:
+      copyArray(actualMac,mac1HQ6,MAC_SIZE);
+    break;
+    case 12:
+      copyArray(actualMac,mac1FWA,MAC_SIZE);
+    break;
+    case 13:
+      copyArray(actualMac,mac1F56,MAC_SIZE);
+    break;
   }
   //habilitamos el puerto ethernet de galileo
   if(DEBUG == 1) Serial.print("Setting up ethernet port");
@@ -143,7 +159,6 @@ boolean initializeEthernet(){
 void sendDweet(float presion, float temperatura, double ruido,
                uint32_t lumens)
 {
-  //ruido = 20 * log10(ruido / 5);
   if(DEBUG == 1) Serial.println("Sending...");
   if(client.connect(server,80)){
     if(hasError(SERVER)){
@@ -214,6 +229,7 @@ float getPressure(){
 
 float getTemperature(){
   float temperature = barometro.getTemperature();
+  temperature -= CAL_TEMP;
   return temperature;
 }
 
@@ -263,9 +279,9 @@ float getNoise(){
   peekToPeek = (signalMax - signalMin) / 2;  
   if(sample == 1)
     return 0;
-  //double ruido = (peekToPeek * 3.3) / 1024;
-//  double ruido = 20 * log10(sample / 2);
+    
   double ruido = 20 * log10(peekToPeek / 10);
+  ruido += CAL_NOISE;
   return ruido;
 }
 
