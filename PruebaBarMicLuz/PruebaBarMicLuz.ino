@@ -4,8 +4,9 @@
 #include <Ethernet.h>
 //#include <TimerOne.h>
 
-//SERIAL USE FOR TESTING
-#define DEBUG 0
+//SERIAL USE FOR TESTING, show prints on serial monitor
+//1 = ENABLED, 0 = DISABLED
+#define DEBUG 1
 //El valor hexadecimal es el tiempo de parpadeo para errores
 #define LUZ 		0x01	//0000	0001
 #define PRESION 	0x02	//0000	0010
@@ -50,7 +51,7 @@ int ledError = 8;
 #define G_1F56  13
 /***** Ethernet ******/
 
-#define GALILEO G_1F56
+#define GALILEO G_1HQ6
 #define thingName "SC_Galileo_5"
 
 #define MAC_SIZE 6
@@ -75,7 +76,7 @@ byte mac3M0B[] = { 0x98, 0x4F, 0xEE, 0x02, 0xD7, 0xFF }; // GALILLEO 2
 byte actualMac[6];
 EthernetClient client;
 
-char sensor_id[] = "G_1F56";
+char sensor_id[] = "G_1HQ6";
 char server[] = "148.202.23.200";
 float longitude;
 float latitude;
