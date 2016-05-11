@@ -12,17 +12,20 @@
 #define PRESION 	0x02	//0000	0010
 #define TEMPERATURA     0x04	//0000	0100
 #define RUIDO 		0x08	//0000	1000
-#define ETHERNET 	0x10	//0001  0000
-#define SERVER	 	0x20	//0010  0000
+#define HUMEDAD 	0x10	//0001  0000
+#define AGUA	 	0x20	//0010  0000
 byte errorFlag = 0x0;
 byte readingFlag = 0x0;
 
 //FRECUENCIA DE MUESTREO
 #define MUESTREO        1000 * 60 // 30 segundos antes y despues de chequeo de errores
-#define TIME_TEMP 10              //minutos
-#define TIME_PRESS 10             //minutos
-#define TIME_LIGHT 1              //minutos
-#define TIME_NOISE 1              //minutos
+#define TIME_TEMP 	10              //minutos
+#define TIME_PRESS 	10             //minutos
+#define TIME_LIGHT 	1              //minutos
+#define TIME_HUM 	1              //minutos
+#define TIME_GAS	1              //minutos
+#define TIME_AGUA 	1              //minutos
+#define TIME_NOISE 	1              //minutos
 
 //CALIBRACION
 #define CAL_TEMP 5
