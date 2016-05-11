@@ -267,6 +267,10 @@ void _sendDataMQTT(String tipoLectura){
     addValueToFile("values.txt",luminosidadCompleta);
   }else if(tipoLectura.equals("noise")){
     addValueToFile("values.txt",ruido);
+  }else if(tipoLectura.equals("noise")){
+    addValueToFile("values.txt",ruido);
+  }else if(tipoLectura.equals("noise")){
+    addValueToFile("values.txt",ruido);
   }
   
   char command [path.length() + 1  ];
@@ -440,6 +444,9 @@ int cont_temp = 0;
 int cont_press = 0;
 int cont_light = 0;
 int cont_noise = 0;
+int cont_gas = 0;
+int cont_hum = 0;
+int cont_water = 0;
 
 void loop() {
   String tipoLectura = String();
