@@ -12,10 +12,12 @@
 #define PRESION 	0x02	//0000	0010
 #define TEMPERATURA     0x04	//0000	0100
 #define RUIDO 		0x08	//0000	1000
-#define HUMEDAD 	0x10	//0001  0000
-#define AGUA	 	0x20	//0010  0000
+#define GAS	 		0x10
+#define HUMEDAD 	0x20	//0001  0000
+#define AGUA	 	0x40	//0010  0000
 byte errorFlag = 0x0;
 byte readingFlag = 0x0;
+byte estatus_sensores = 0x0;
 
 //FRECUENCIA DE MUESTREO
 #define MUESTREO        1000 * 60 // 30 segundos antes y despues de chequeo de errores
@@ -462,10 +464,28 @@ void loop() {
       //timerIsr();
       if(DEBUG == 1) Serial.println("state:Duermo 1 min"); 
       delay(MUESTREO); //Duermete y cuando despiertes cuenta
-      cont_temp++;
-      cont_press++;
-      cont_light++;
-      cont_noise++;
+      if( (estatus_sensores & LUZ) == LUZ ){
+      	cont_light++;	
+      }
+      if( (estatus_sensores & TEMPERATURA) == TEMPERATURA ){
+      	cont_temp++;	
+      }
+      if( (estatus_sensores & PRESION) == PRESION ){
+      	cont_press++;	
+      }
+      if( (estatus_sensores & RUIDO) == RUIDO ){
+      	cont_noise++;	
+      }
+      if( (estatus_sensores & GAS) == GAS){
+      	cont_gas++;	
+      }
+      if( (estatus_sensores & HUMEDAD) == HUMEDAD ){
+      	cont_hum++;	
+      }
+      if( (estatus_sensores & AGUA) == AGUA ){
+      	cont_water++;	
+      }
+
       if(DEBUG == 1){
         Serial.print("cont_temp = ");
         Serial.println(cont_temp); 
@@ -475,6 +495,12 @@ void loop() {
         Serial.println(cont_light);
         Serial.print("cont_noise = ");
         Serial.println(cont_noise);
+        Serial.print("cont_gas = ");
+        Serial.println(cont_gas);
+        Serial.print("cont_hum = ");
+        Serial.println(cont_hum);
+        Serial.print("cont_water = ");
+        Serial.println(cont_water);
       }
       if(DEBUG == 1) Serial.println("state:Idle");      
       if(cont_temp >= TIME_TEMP){
@@ -488,6 +514,15 @@ void loop() {
       }
       if(cont_noise >= TIME_NOISE){
         readingFlag = readingFlag | RUIDO;
+      }
+      if(cont_noise >= TIME_GAS){
+        readingFlag = readingFlag | GAS;
+      }
+      if(cont_noise >= TIME_HUM){
+        readingFlag = readingFlag | HUMEDAD;
+      }
+      if(cont_noise >= TIME_AGUA){
+        readingFlag = readingFlag | AGUA;
       }
       if(readingFlag != 0x00){
         state = readSensors;
