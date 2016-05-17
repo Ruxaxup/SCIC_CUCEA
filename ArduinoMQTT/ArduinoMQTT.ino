@@ -29,6 +29,16 @@ byte estatus_sensores = 0x0;
 #define TIME_AGUA 	1              //minutos
 #define TIME_NOISE 	1              //minutos
 
+//LEDS
+#define LED_ERROR 13
+#define LED_WARNING 12
+#define LED_OK 11
+
+//SENSOR LEYENDO
+#define LED_SENS_1 10
+#define LED_SENS_2 9
+#define LED_SENS_3 8
+
 //CALIBRACION
 #define CAL_TEMP 5
 #define CAL_NOISE 0
@@ -181,58 +191,7 @@ void blinkRedLED(int cantidad){
 
 //METODO PARA CHEQUEO DE ERRORES
 void timerIsr(){
-  digitalWrite(ledError, HIGH);
-  delay(2000);
-  digitalWrite(ledError, LOW);
-  if( (errorFlag&LUZ) == LUZ){
-    blinkError(LUZ);
-  }
-  
-  digitalWrite(ledError, HIGH);
-  delay(2000);
-  digitalWrite(ledError, LOW);
-  
-  if( (errorFlag&PRESION) == PRESION){
-    blinkError(PRESION);
-  }
-  
-  digitalWrite(ledError, HIGH);
-  delay(2000);
-  digitalWrite(ledError, LOW);
-  
-  if( (errorFlag&TEMPERATURA) == TEMPERATURA){
-    blinkError(TEMPERATURA);
-  }
-  
-  digitalWrite(ledError, HIGH);
-  delay(2000);
-  digitalWrite(ledError, LOW);
-  
-  if( (errorFlag&RUIDO) == RUIDO){
-    blinkError(RUIDO);
-  }
-  
-  digitalWrite(ledError, HIGH);
-  delay(2000);
-  digitalWrite(ledError, LOW);  
-  
-  if( (errorFlag&ETHERNET) == ETHERNET){
-    blinkError(ETHERNET);    
-  }
-  
-  digitalWrite(ledError, HIGH);
-  delay(2000);
-  digitalWrite(ledError, LOW);
-  
-  if( (errorFlag&SERVER) == SERVER){
-    blinkError(SERVER);
-    //REINICIAR EL SISTEMA
-    if(DEBUG ==1){
-      Serial.println("Rebooting system...");
-    }
-    rebootLEDs();
-    system("reboot");
-  }
+
 }
 
 //REBOOT INDICATOR
@@ -269,9 +228,11 @@ void _sendDataMQTT(String tipoLectura){
     addValueToFile("values.txt",luminosidadCompleta);
   }else if(tipoLectura.equals("noise")){
     addValueToFile("values.txt",ruido);
-  }else if(tipoLectura.equals("noise")){
+  }else if(tipoLectura.equals("gas")){
     addValueToFile("values.txt",ruido);
-  }else if(tipoLectura.equals("noise")){
+  }else if(tipoLectura.equals("water")){
+    addValueToFile("values.txt",ruido);
+  }else if(tipoLectura.equals("hum")){
     addValueToFile("values.txt",ruido);
   }
   
@@ -432,14 +393,18 @@ void setup() {
   
   // put your setup code here, to run once:
   barometro.begin();
-  pinMode(ledMic, OUTPUT);
-  digitalWrite(ledMic,LOW);
-  pinMode(ledLuz, OUTPUT);
-  digitalWrite(ledLuz,LOW);
-  pinMode(ledBar, OUTPUT);    
-  digitalWrite(ledBar,LOW);
-  pinMode(ledError, OUTPUT);
-  digitalWrite(ledError, LOW);
+  pinMode(LED_ERROR, OUTPUT);
+  digitalWrite(LED_ERROR,LOW);
+  pinMode(LED_WARNING, OUTPUT);
+  digitalWrite(LED_WARNING,LOW);
+  pinMode(LED_OK, OUTPUT);    
+  digitalWrite(LED_OK,LOW);
+  pinMode(LED_SENS_1, OUTPUT);
+  digitalWrite(LED_SENS_1, LOW);
+  pinMode(LED_SENS_2, OUTPUT);
+  digitalWrite(LED_SENS_2, LOW);
+  pinMode(LED_SENS_3, OUTPUT);
+  digitalWrite(LED_SENS_3, LOW);
 }
 
 int cont_temp = 0;
