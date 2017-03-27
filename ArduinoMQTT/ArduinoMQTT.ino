@@ -20,7 +20,7 @@ byte readingFlag = 0x0;
 byte estatus_sensores = 0x0;
 
 //FRECUENCIA DE MUESTREO
-#define MUESTREO        1000 * 60 // 30 segundos antes y despues de chequeo de errores
+#define SAMPLING        1000 * 60 // 30 segundos antes y despues de chequeo de errores
 #define TIME_TEMP 	10              //minutos
 #define TIME_PRESS 	10             //minutos
 #define TIME_LIGHT 	1              //minutos

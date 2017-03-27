@@ -19,18 +19,16 @@
 #define DEBUG 0
 
 //FRECUENCIA DE MUESTREO
-#define CURRENT_AVG 0				//1 si medimos la corriente por medio de promedio, 0 para cada valor en SEGUNDO
-#define SEGUNDO         10
-#define MUESTREO        10 * 60 // 30 segundos antes y despues de chequeo de errores
-#define TIME_TEMP 	1             //minutos
-#define TIME_PRESS 	1             //minutos
-#define TIME_LIGHT 	1              //minutos
-#define TIME_HUM 	1              //minutos
-#define TIME_GAS	1              //minutos
-#define TIME_POTENCIA 	1              //minutos
-#define TIME_NOISE 	1              //minutos
-#define TIME_DISC       2              //Minutos sin sensores
-
+#define SECOND         			1000
+#define CONNECTION_DELAY        SECOND * 1 		// 1 second
+#define TIME_TEMP 				1             	//seconds
+#define TIME_PRESS 				1             	//seconds
+#define TIME_LIGHT 				1              	//seconds
+#define TIME_HUM 				1              	//seconds
+#define TIME_GAS				1              	//seconds
+#define TIME_POTENCIA 			1              	//seconds
+#define TIME_NOISE 				1              	//seconds
+#define TIME_DISC       		SECOND * 2     	//Time for connecting sensors
 //LEDS
 
 #define LED_ERROR 13
@@ -44,6 +42,7 @@
 #define LED_SENS_3 8
 
 //PINES SENSORES
+#define NOISE_PIN	0
 #define CURRENT_PIN	1
 
 
@@ -85,20 +84,20 @@ enum states{
 
 states state = start;
 
-//Temperatura & Humedad
+//Temperature & Humidty
 Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
-//ruido
+//Noise
 const int sampleWindow = 50; // Ventana de muestra en ms (50 mS = 20Hz)
 unsigned int sample;
 
-//presion
+//Pressure
 Adafruit_MPL115A2 mpl115a2;
 
-//Luz  
+//Light  
 Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 12345);
 
-//POTENCIA
+//Energy
 EnergyMonitor emon1;
 
 Mediciones m;
@@ -112,7 +111,6 @@ void _sendMetaData(String status){
     char command [path.length() + 1  ];
     path.toCharArray(command, sizeof(command)); 
     if(DEBUG == 1) Serial.println(command);
-    //blinkRedLED(20);
     system(command);
 }
 
@@ -138,9 +136,7 @@ void _sendDataMQTT(String tipoLectura, String status){
         addValueToFile("values.txt",m.CH4);
         addValueToFile("values.txt",m.H2);
         addValueToFile("values.txt",m.C2H5OH);
-    }else if(tipoLectura.equals("water")){ //TBD
-        //addValueToFile("values.txt",0);
-    }else if(tipoLectura.equals("power")){ //TBD
+    }else if(tipoLectura.equals("power")){
         addValueToFile("values.txt",m.current*127);
     }else if(tipoLectura.equals("hum")){
         addValueToFile("values.txt",m.hum);
@@ -149,7 +145,6 @@ void _sendDataMQTT(String tipoLectura, String status){
     char command [path.length() + 1  ];
     path.toCharArray(command, sizeof(command)); 
     if(DEBUG == 1) Serial.println(command);
-    //blinkRedLED(20);
     system(command);
 }
 
@@ -231,9 +226,6 @@ void _readSensors()
       if( (readingFlag & HUMEDAD) == HUMEDAD){
        getTempHum();
       }
-      /*if( (readingFlag & POTENCIA) == POTENCIA) {
-       getCurrent();
-      }*/
 }
 
 boolean getCurrent()
@@ -341,7 +333,7 @@ boolean getRuido()
   // colectar datos de  50 mS
   while (millis() - startMillis < sampleWindow)
   {
-    sample = analogRead(0); //asigna voltajes de entrada entre 0 y 5 v en valores enteros entre 0 y 1023
+    sample = analogRead(NOISE_PIN); //asigna voltajes de entrada entre 0 y 5 v en valores enteros entre 0 y 1023
     if (sample < 1024) 
     {
       if (sample > signalMax)
@@ -356,10 +348,7 @@ boolean getRuido()
   }
   peakToPeak = signalMax - signalMin;  // max - min = amplitud del valor pico a pico
   double volts = (peakToPeak * 3.3) / 1024;  // conversion de voltajes
-  double decibelios = (20 * log10(volts / 10)) * -1;//Conversión a decibeles  
-  //Serial.print(decibelios); Serial.println("Db");
-  //Serial.println(analogRead(0));
-  
+  double decibelios = (20 * log10(volts / 10)) * -1;//Conversión a decibeles
   
   m.decibelios=decibelios;
   if(analogRead(0) <= 1)
@@ -547,7 +536,7 @@ void turnOnSensorLeds(byte sensor)
 
 void resetLeds()
 {
- delay(SEGUNDO);
+ delay(SECOND);
  digitalWrite (LED_SENS_1, LOW);
  digitalWrite (LED_SENS_2, LOW);
  digitalWrite (LED_SENS_3, LOW);
@@ -598,8 +587,6 @@ void check_ranges()
          }	
       	
       }
-      
-      ////////falta implementar POTENCIA///////
      if( (estatus_sensores & POTENCIA) == POTENCIA ){
             if (m.current>30 || m.current <= 0){
            warningFlag = warningFlag | POTENCIA;    
@@ -804,22 +791,9 @@ int cont_disconnected = 0;
    
     break;
     
-   case idle:      
-      //timerIsr();
-      if(DEBUG == 1) Serial.println("state:Duermo 1 min"); 
-      #if CURRENT_AVG == 1
-	      m.current = 0.0; //Se resetea el conteo de potencia
-	      for(int i = 0; i < 60; i++) //Cuenta por 60 segundos
-	      {
-	      	getCurrent();
-	      	m.current += m.current;
-	      	delay(SEGUNDO);
-	      }
-	      m.current = m.current / 60; //Promedio de la potencia en un minuto      
-      #else
-	      delay(SEGUNDO);
-      #endif
-      //delay(MUESTREO); //Duermete y cuando despiertes cuenta
+   case idle:
+      if(DEBUG == 1) Serial.println("state:Duermo 1 min");
+      
       if( (estatus_sensores & LUZ) == LUZ ){
       	cont_light++;	
       }else{
@@ -903,7 +877,6 @@ int cont_disconnected = 0;
     case sendMetadata:
       if(DEBUG == 1) Serial.println("state:sendMetadata");
       _sendMetaData("S");
-      //_sendMetaData();
       state = idle;
     break;
     
@@ -1004,11 +977,10 @@ int cont_disconnected = 0;
     
       }
       clearData();
-      if(DEBUG == 1)Serial.print("VARIABLE MAGICA: ");
+      if(DEBUG == 1)Serial.print("SENSORS STATUS: ");
       if(DEBUG == 1)Serial.println(estatus_sensores);
       if(false){
-      //if(estatus_sensores < ALL_CONNECTED){
-        if(DEBUG == 1)Serial.println("VAMO A CONECTA");
+        if(DEBUG == 1)Serial.println("CONNECT SENSOR");
         state = connectSensors;
       }else{
         state = start;
@@ -1035,20 +1007,19 @@ int cont_disconnected = 0;
         cont_disconnected = 0;
         state = start;
       }else{
-        delay(MUESTREO);
+        delay(CONNECTION_DELAY);
       }
       
     break;
           
     case connectSensors:
-      //PRENDER TODOS LOS LEDS
       blinkConnectionLEDS(5);
       cont_disconnected++;
       if(cont_disconnected == TIME_DISC){
         cont_disconnected = 0;
         state = start;
       }else{
-        delay(MUESTREO);
+        delay(CONNECTION_DELAY);
       }
     break;
 
